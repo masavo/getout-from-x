@@ -60,21 +60,20 @@
     }
   }
 
-  class SignInManager {
+  class SignInContainerManager {
     constructor(domObserver) {
       this.domObserver = domObserver;
-      this.initializeObserver();
     }
 
-    initializeObserver() {
+    observe(callback) {
       this.domObserver.observeElementAppendedTiming(
         '[data-testid="google_sign_in_container"]',
         "#react-root",
-        (element) => this.removeSignInContainer(element)
+        (element) => callback(element)
       );
     }
 
-    removeSignInContainer(container) {
+    remove(container) {
       if (container && container.parentNode) {
         container.parentNode.remove();
         console.log("Sign In Container を削除しました。");
@@ -82,48 +81,52 @@
     }
   }
 
-  class TextOverwriter {
+  class TextBoxManager {
     constructor(domObserver) {
       this.domObserver = domObserver;
       this.texts = [
         "お前の居場所は、ここではない。",
         "今すぐここから立ち去りなさい。",
       ];
-      this.initializeObserver();
     }
 
-    initializeObserver() {
+    observe(callback) {
       this.domObserver.observeElementAppendedTiming(
         'div[dir="ltr"] > span',
         "#react-root",
-        (element) => {
-          const targetContainers =
-            document.querySelectorAll("#react-root > div");
-          targetContainers.forEach((container) => {
-            this.processTargetElements(container);
-          });
-        }
+        (element) => callback(element)
       );
     }
 
-    overwriteText(element, newText) {
+    overwrite(element, newText) {
       if (element) {
         element.textContent = newText;
         console.log(`要素のテキストを上書きしました: ${newText}`, element);
       }
     }
 
-    processTargetElements(element) {
-      const targetElements = element.querySelectorAll('div[dir="ltr"] > span');
-      targetElements.forEach((targetElement, index) => {
+    overwriteAll(element) {
+      this.targetElements(element).forEach((targetElement, index) => {
         if (this.texts[index]) {
-          this.overwriteText(targetElement, this.texts[index]);
+          this.overwrite(targetElement, this.texts[index]);
         }
       });
     }
+
+    targetElements(element) {
+      return element.querySelectorAll('div[dir="ltr"] > span');
+    }
   }
 
+  // 処理
   const domObserver = new DOMObserver(document);
-  const signInManager = new SignInManager(domObserver);
-  const textOverwriter = new TextOverwriter(domObserver);
+  const signInContainerManager = new SignInContainerManager(domObserver);
+  signInContainerManager.observe((element) => {
+    signInContainerManager.remove(element);
+  });
+
+  const textBoxManager = new TextBoxManager(domObserver);
+  textBoxManager.observe((element) => {
+    textBoxManager.overwriteAll(element);
+  });
 })();
