@@ -82,40 +82,48 @@
     }
   }
 
-  // 上書きするテキストの情報を配列で定義します。
-  const texts = [
-    "お前の居場所は、ここではない。",
-    "今すぐここから立ち去りなさい。",
-  ];
-
-  function overwriteText(element, newText) {
-    if (element) {
-      element.textContent = newText;
-      console.log(`要素のテキストを上書きしました: ${newText}`, element);
+  class TextOverwriter {
+    constructor(domObserver) {
+      this.domObserver = domObserver;
+      this.texts = [
+        "お前の居場所は、ここではない。",
+        "今すぐここから立ち去りなさい。",
+      ];
+      this.initializeObserver();
     }
-  }
 
-  function processTargetElements(element) {
-    const targetElements = element.querySelectorAll('div[dir="ltr"] > span');
-    targetElements.forEach((targetElement, index) => {
-      if (texts[index]) {
-        overwriteText(targetElement, texts[index]);
+    initializeObserver() {
+      this.domObserver.observeElementAppendedTiming(
+        'div[dir="ltr"] > span',
+        "#react-root",
+        (element) => {
+          const targetContainers =
+            document.querySelectorAll("#react-root > div");
+          targetContainers.forEach((container) => {
+            this.processTargetElements(container);
+          });
+        }
+      );
+    }
+
+    overwriteText(element, newText) {
+      if (element) {
+        element.textContent = newText;
+        console.log(`要素のテキストを上書きしました: ${newText}`, element);
       }
-    });
+    }
+
+    processTargetElements(element) {
+      const targetElements = element.querySelectorAll('div[dir="ltr"] > span');
+      targetElements.forEach((targetElement, index) => {
+        if (this.texts[index]) {
+          this.overwriteText(targetElement, this.texts[index]);
+        }
+      });
+    }
   }
 
   const domObserver = new DOMObserver(document);
   const signInManager = new SignInManager(domObserver);
-
-  // テキストの変更を監視する
-  domObserver.observeElementAppendedTiming(
-    'div[dir="ltr"] > span',
-    "#react-root",
-    (element) => {
-      const targetContainers = document.querySelectorAll("#react-root > div");
-      targetContainers.forEach((container) => {
-        processTargetElements(container);
-      });
-    }
-  );
+  const textOverwriter = new TextOverwriter(domObserver);
 })();
