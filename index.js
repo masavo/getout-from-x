@@ -106,15 +106,15 @@
     }
 
     overwriteAll(element) {
-      this.targetElements(element).forEach((targetElement, index) => {
+      this.#targetElements().forEach((targetElement, index) => {
         if (this.texts[index]) {
           this.overwrite(targetElement, this.texts[index]);
         }
       });
     }
 
-    targetElements(element) {
-      return element.querySelectorAll('div[dir="ltr"] > span');
+    #targetElements() {
+      return document.querySelectorAll('div[dir="ltr"] > span');
     }
   }
 
