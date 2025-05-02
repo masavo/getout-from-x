@@ -60,6 +60,28 @@
     }
   }
 
+  class SignInManager {
+    constructor(domObserver) {
+      this.domObserver = domObserver;
+      this.initializeObserver();
+    }
+
+    initializeObserver() {
+      this.domObserver.observeElementAppendedTiming(
+        '[data-testid="google_sign_in_container"]',
+        "#react-root",
+        (element) => this.removeSignInContainer(element)
+      );
+    }
+
+    removeSignInContainer(container) {
+      if (container && container.parentNode) {
+        container.parentNode.remove();
+        console.log("Sign In Container を削除しました。");
+      }
+    }
+  }
+
   // 上書きするテキストの情報を配列で定義します。
   const texts = [
     "お前の居場所は、ここではない。",
@@ -82,14 +104,8 @@
     });
   }
 
-  function removeGoogleSignInContainer(googleSignInContainer) {
-    if (googleSignInContainer && googleSignInContainer.parentNode) {
-      googleSignInContainer.parentNode.remove();
-      console.log("Google Sign In Container を削除しました。");
-    }
-  }
-
   const domObserver = new DOMObserver(document);
+  const signInManager = new SignInManager(domObserver);
 
   // テキストの変更を監視する
   domObserver.observeElementAppendedTiming(
@@ -100,15 +116,6 @@
       targetContainers.forEach((container) => {
         processTargetElements(container);
       });
-    }
-  );
-
-  // Google Sign In Container の削除を監視する
-  domObserver.observeElementAppendedTiming(
-    '[data-testid="google_sign_in_container"]',
-    "#react-root",
-    (element) => {
-      removeGoogleSignInContainer(element);
     }
   );
 })();
