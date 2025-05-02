@@ -17,13 +17,24 @@
       this.reactRoot = root?.querySelector("#react-root") || null;
     }
 
-    #isValidElement(node, targetSelector) {
-      return node instanceof HTMLElement && node.querySelector(targetSelector);
+    observeElementAppendedTiming(
+      targetSelector,
+      parentSelector,
+      callback,
+      options = { childList: true, subtree: true }
+    ) {
+      const parentElement = document.querySelector(parentSelector);
+      this.#setupObserver(parentElement, targetSelector, callback, options);
     }
 
-    #getTargetElement(node, targetSelector) {
-      const element = node.querySelector(targetSelector);
-      return element instanceof HTMLElement ? element : null;
+    #setupObserver(parentElement, targetSelector, callback, options) {
+      const observer = new MutationObserver((mutations) => {
+        this.#handleMutations(mutations, targetSelector, callback);
+      });
+
+      if (parentElement) {
+        observer.observe(parentElement, options);
+      }
     }
 
     #handleMutations(mutations, targetSelector, callback) {
@@ -39,24 +50,13 @@
       });
     }
 
-    #setupObserver(parentElement, targetSelector, callback, options) {
-      const observer = new MutationObserver((mutations) => {
-        this.#handleMutations(mutations, targetSelector, callback);
-      });
-
-      if (parentElement) {
-        observer.observe(parentElement, options);
-      }
+    #isValidElement(node, targetSelector) {
+      return node instanceof HTMLElement && node.querySelector(targetSelector);
     }
 
-    observeElementAppendedTiming(
-      targetSelector,
-      parentSelector,
-      callback,
-      options = { childList: true, subtree: true }
-    ) {
-      const parentElement = document.querySelector(parentSelector);
-      this.#setupObserver(parentElement, targetSelector, callback, options);
+    #getTargetElement(node, targetSelector) {
+      const element = node.querySelector(targetSelector);
+      return element instanceof HTMLElement ? element : null;
     }
   }
 
