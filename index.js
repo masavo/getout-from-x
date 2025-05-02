@@ -17,32 +17,46 @@
       this.reactRoot = root?.querySelector("#react-root") || null;
     }
 
+    #isValidElement(node, targetSelector) {
+      return node instanceof HTMLElement && node.querySelector(targetSelector);
+    }
+
+    #getTargetElement(node, targetSelector) {
+      const element = node.querySelector(targetSelector);
+      return element instanceof HTMLElement ? element : null;
+    }
+
+    #handleMutations(mutations, targetSelector, callback) {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (this.#isValidElement(node, targetSelector)) {
+            const element = this.#getTargetElement(node, targetSelector);
+            if (element) {
+              callback(element);
+            }
+          }
+        });
+      });
+    }
+
+    #setupObserver(parentElement, targetSelector, callback, options) {
+      const observer = new MutationObserver((mutations) => {
+        this.#handleMutations(mutations, targetSelector, callback);
+      });
+
+      if (parentElement) {
+        observer.observe(parentElement, options);
+      }
+    }
+
     observeElementAppendedTiming(
       targetSelector,
       parentSelector,
       callback,
       options = { childList: true, subtree: true }
     ) {
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            if (
-              node instanceof HTMLElement &&
-              node.querySelector(targetSelector)
-            ) {
-              const element = node.querySelector(targetSelector);
-              if (element instanceof HTMLElement) {
-                callback(element);
-              }
-            }
-          });
-        });
-      });
-
       const parentElement = document.querySelector(parentSelector);
-      if (parentElement) {
-        observer.observe(parentElement, options);
-      }
+      this.#setupObserver(parentElement, targetSelector, callback, options);
     }
   }
 
