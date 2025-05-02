@@ -17,7 +17,7 @@
       this.reactRoot = root?.querySelector("#react-root") || null;
     }
 
-    observeElementAppend(
+    observeElementAppendedTiming(
       targetSelector,
       parentSelector,
       callback,
@@ -78,7 +78,7 @@
   const domObserver = new DOMObserver(document);
 
   // テキストの変更を監視する
-  domObserver.observeElementAppend(
+  domObserver.observeElementAppendedTiming(
     'div[dir="ltr"] > span',
     "#react-root",
     (element) => {
@@ -90,7 +90,7 @@
   );
 
   // Google Sign In Container の削除を監視する
-  domObserver.observeElementAppend(
+  domObserver.observeElementAppendedTiming(
     '[data-testid="google_sign_in_container"]',
     "#react-root",
     (element) => {
