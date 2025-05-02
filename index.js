@@ -73,11 +73,13 @@
       );
     }
 
-    remove(container) {
-      if (container && container.parentNode) {
-        container.parentNode.remove();
-        console.log("Sign In Container を削除しました。");
-      }
+    remove() {
+      this.#getElement().remove();
+    }
+
+    #getElement() {
+      return document.querySelector('[data-testid="google_sign_in_container"]')
+        .parentNode;
     }
   }
 
@@ -105,15 +107,15 @@
       }
     }
 
-    overwriteAll(element) {
-      this.#targetElements().forEach((targetElement, index) => {
+    overwriteAll() {
+      this.#getElements().forEach((targetElement, index) => {
         if (this.texts[index]) {
           this.overwrite(targetElement, this.texts[index]);
         }
       });
     }
 
-    #targetElements() {
+    #getElements() {
       return document.querySelectorAll('div[dir="ltr"] > span');
     }
   }
@@ -121,12 +123,12 @@
   // 処理
   const domObserver = new DOMObserver(document);
   const signInContainerManager = new SignInContainerManager(domObserver);
-  signInContainerManager.observe((element) => {
-    signInContainerManager.remove(element);
+  signInContainerManager.observe(() => {
+    signInContainerManager.remove();
   });
 
   const textBoxManager = new TextBoxManager(domObserver);
-  textBoxManager.observe((element) => {
-    textBoxManager.overwriteAll(element);
+  textBoxManager.observe(() => {
+    textBoxManager.overwriteAll();
   });
 })();
